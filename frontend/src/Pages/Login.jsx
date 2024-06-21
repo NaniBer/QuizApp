@@ -21,7 +21,7 @@ const Login = () => {
   return (
     <Container
       maxWidth="sm"
-      className="flex items-center justify-center min-h-screen dark:bg-dark-background"
+      className="flex items-center justify-center dark:bg-dark-background"
     >
       <Box className="w-full p-6 dark:bg-dark-surface rounded-lg shadow-lg">
         <SignIn
