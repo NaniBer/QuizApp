@@ -5,10 +5,27 @@ const cors = require("cors");
 const User = require("./models/user");
 require("dotenv").config();
 const connection = require("./dbConnection");
+const { ClerkExpressWithAuth } = require("@clerk/clerk-sdk-node");
 
+const CLERK_PUBLISHABLE_KEY = process.env.CLERK_API_KEY;
+const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
 const app = express();
 app.use(express.json());
 app.use(cors());
+const { verifyToken } = require("@clerk/clerk-sdk-node");
+
+app.use(async (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+
+  try {
+    const verifiedToken = await verifyToken(token);
+    req.user = verifiedToken;
+    next();
+  } catch (error) {
+    res.status(401).send("Unauthorized");
+  }
+});
+
 // Test database connection
 async function testConnection() {
   try {
@@ -21,6 +38,15 @@ async function testConnection() {
 }
 
 testConnection();
+app.use(
+  ClerkExpressWithAuth({
+    apiKey: CLERK_API_KEY,
+    secretKey: CLERK_SECRET_KEY,
+  })
+);
+app.get("/protected", ClerkExpressWithAuth(), (req, res) => {
+  res.send("This is a protected route");
+});
 
 // Example route to fetch all users
 app.get("/users", async (req, res) => {
